@@ -8,18 +8,32 @@ export const getProjects = catchAsyncError(async (_req, res) => {
   res.status(200).json({ success: true, projects });
 });
 
-export const addProject = catchAsyncError(async (req, res) => {
-  const { title, description, techStack, githubUrl, liveUrl, featured, order } = req.body;
+export const addProject = catchAsyncError(async (req, res, next) => {
+  const title = req.body?.title;
+  const description = req.body?.description;
+  const githubUrl = req.body?.githubUrl || '';
+  const liveUrl = req.body?.liveUrl || '';
+  const techStack = req.body?.techStack ? (Array.isArray(req.body.techStack) ? req.body.techStack : [req.body.techStack]) : [];
+  const featured = req.body?.featured === 'true' || req.body?.featured === true;
+  const order = req.body?.order != null ? Number(req.body.order) : 0;
+
+  if (!title || !description) {
+    return next(new ErrorHandler('Title and description are required', 400));
+  }
 
   let image;
-  if (req.files?.image) {
-    const result = await cloudinary.v2.uploader.upload(req.files.image.tempFilePath, {
-      folder: 'portfolio/projects',
-    });
-    image = {
-      public_id: result.public_id,
-      url: result.secure_url,
-    };
+  if (req.files?.image?.tempFilePath) {
+    try {
+      const result = await cloudinary.v2.uploader.upload(req.files.image.tempFilePath, {
+        folder: 'portfolio/projects',
+      });
+      image = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
+    } catch (err) {
+      return next(new ErrorHandler('Image upload failed. Check Cloudinary config. ' + (err.message || ''), 400));
+    }
   }
 
   const project = await Project.create({

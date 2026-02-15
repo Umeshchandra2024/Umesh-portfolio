@@ -5,6 +5,11 @@ import { dbConnection } from './config/dbConnection.js';
 
 const PORT = process.env.PORT || 5000;
 
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.trim() === '') {
+  console.error('❌ JWT_SECRET is missing or empty in environment. Set it in .env (local) or in your host’s env vars (e.g. Render).');
+  process.exit(1);
+}
+
 // Database
 dbConnection();
 

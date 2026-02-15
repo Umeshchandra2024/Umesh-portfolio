@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import os from 'os';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -28,6 +29,7 @@ app.use(
   cors({
     origin: allowedOrigins,
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
   }),
 );
 
@@ -37,7 +39,7 @@ app.use(cookieParser());
 app.use(
   fileUpload({
     useTempFiles: true,
-    tempFileDir: '/tmp',
+    tempFileDir: os.tmpdir(),
   }),
 );
 
