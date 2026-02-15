@@ -9,14 +9,16 @@ export const dbConnection = async () => {
   }
 
   try {
+    // Add these additional options to help with DNS issues
     await mongoose.connect(mongoUri, {
       serverSelectionTimeoutMS: 30000,
       socketTimeoutMS: 45000,
+      family: 4, // Use IPv4, skip trying IPv6
     });
     console.log('✅ MongoDB connected successfully');
   } catch (error) {
     console.error('❌ MongoDB connection failed:', error.message);
+    console.error('Full error:', error);
     process.exit(1);
   }
 };
-

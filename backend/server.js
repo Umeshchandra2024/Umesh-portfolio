@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 5000;
 // Database
 dbConnection();
 
-// Cloudinary configuration (used by controllers for avatar/project images, etc.)
+// Cloudinary configuration
 if (process.env.CLOUDINARY_NAME) {
   cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,
