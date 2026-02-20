@@ -13,7 +13,7 @@ const projectSchema = new mongoose.Schema(
     techStack: [String],
     githubUrl: String,
     liveUrl: String,
-    image: {
+    video: {
       public_id: String,
       url: String,
     },

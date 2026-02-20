@@ -59,6 +59,7 @@ app.use('/api/v1/software', softwareApplicationRoutes);
 
 // 404 handler
 app.all('*', (req, res) => {
+  console.log('404 - Route not found:', req.method, req.originalUrl);
   res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
 });
 
