@@ -12,6 +12,7 @@ import skillRoutes from './routes/skillRoutes.js';
 import timelineRoutes from './routes/timelineRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import softwareApplicationRoutes from './routes/softwareApplicationRoutes.js';
+import resumeRoutes from './routes/resumeRoutes.js';
 import { errorMiddleware } from './middleware/error.js';
 
 const app = express();
@@ -56,6 +57,7 @@ app.use('/api/v1/skill', skillRoutes);
 app.use('/api/v1/timeline', timelineRoutes);
 app.use('/api/v1/message', messageRoutes);
 app.use('/api/v1/software', softwareApplicationRoutes);
+app.use('/api/v1/resume', resumeRoutes);
 
 // 404 handler
 app.all('*', (req, res) => {
