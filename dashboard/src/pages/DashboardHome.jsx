@@ -8,32 +8,28 @@ export function DashboardHome() {
   const { items: software } = useSelector((state) => state.software);
   const { items: messages } = useSelector((state) => state.messages);
 
+  const cards = [
+    { title: 'Projects', count: projects.length, to: '/projects' },
+    { title: 'Skills', count: skills.length, to: '/skills' },
+    { title: 'Timeline', count: timeline.length },
+    { title: 'Apps / Tools', count: software.length },
+    { title: 'Messages', count: messages.length },
+  ];
+
   return (
-    <div>
-      <h1>Welcome, {user?.name || 'Owner'}</h1>
-      <div className="grid">
-        <div className="card">
-          <h2>Projects</h2>
-          <p>{projects.length} total</p>
-        </div>
-        <div className="card">
-          <h2>Skills</h2>
-          <p>{skills.length} total</p>
-        </div>
-        <div className="card">
-          <h2>Timeline</h2>
-          <p>{timeline.length} entries</p>
-        </div>
-        <div className="card">
-          <h2>Apps / Tools</h2>
-          <p>{software.length} items</p>
-        </div>
-        <div className="card">
-          <h2>Messages</h2>
-          <p>{messages.length} messages</p>
-        </div>
+    <div className="page">
+      <header className="page-header">
+        <h1>Welcome back, {user?.name || 'Owner'}</h1>
+        <p className="page-subtitle">Here’s an overview of your portfolio content.</p>
+      </header>
+      <div className="dashboard-grid">
+        {cards.map((card) => (
+          <div key={card.title} className="stat-card">
+            <h3 className="stat-card-title">{card.title}</h3>
+            <p className="stat-card-value">{card.count}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
-

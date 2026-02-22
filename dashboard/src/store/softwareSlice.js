@@ -1,13 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { api } from '../lib/api.js';
 
 export const getSoftwareApps = createAsyncThunk(
   'software/getAll',
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(`${API_BASE}/api/v1/software`);
+      const { data } = await api.get('/api/v1/software');
       return data.apps;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch software apps');

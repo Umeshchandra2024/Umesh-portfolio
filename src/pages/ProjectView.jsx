@@ -1,119 +1,144 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import { fetchProject } from '@/lib/projectsApi';
 import { Button } from '@/components/ui/button';
+import FormattedDescription from '@/components/FormattedDescription';
 
 export default function ProjectView() {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [technologies, setTechnologies] = useState('');
-  const [stack, setStack] = useState('');
-  const [gitRepoLink, setGitRepoLink] = useState('');
-  const [deployed, setDeployed] = useState('');
-  const [projectLink, setProjectLink] = useState('');
-  const [projectBannerPreview, setProjectBannerPreview] = useState('');
+  const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const { id } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const getProject = async () => {
-      try {
-        const res = await axios.get(
-          `https://portfolio-a55l.onrender.com/api/v1/project/get/${id}`,
-          { withCredentials: true }
-        );
-
-        const project = res.data.project;
-        setTitle(project.title || '');
-        setDescription(project.description || '');
-        setStack(project.stack || '');
-        setDeployed(project.deployed || '');
-        setTechnologies(project.technologies || '');
-        setGitRepoLink(project.gitRepoLink || '');
-        setProjectLink(project.projectLink || '');
-        const bannerUrl = project.projectBanner && project.projectBanner.url;
-        setProjectBannerPreview(bannerUrl || '');
-      } catch (error) {
-        const message =
-          error?.response?.data?.message || 'Failed to load project details';
-        toast.error(message);
-      }
-    };
-
-    if (id) {
-      getProject();
+    if (!id) {
+      setLoading(false);
+      return;
     }
+    fetchProject(id)
+      .then((data) => {
+        console.log('Project data:', data);
+        if (data.success && data.project) {
+          setProject(data.project);
+        } else {
+          throw new Error('Invalid project data received');
+        }
+      })
+      .catch((err) => {
+        console.error('Error fetching project:', err);
+        toast.error(err.message || 'Failed to load project details');
+      })
+      .finally(() => setLoading(false));
   }, [id]);
 
-  const descriptionList = description ? description.split('. ') : [];
-  const technologiesList = technologies ? technologies.split(', ') : [];
-
-  const navigateTo = useNavigate();
   const handleReturnToPortfolio = () => {
-    navigateTo('/');
+    navigate('/');
   };
 
+  if (loading) {
+    return (
+      <div className="page flex justify-center items-center min-h-[50vh]">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className="page flex justify-center items-center min-h-[50vh]">
+        <p>Project not found.</p>
+        <Button onClick={() => navigate('/')} className="ml-4">Back to home</Button>
+      </div>
+    );
+  }
+
   return (
-    <div className="page">
-      <div className="flex mt-7 justify-center items-center min-h-[100vh] sm:gap-4 sm:py-4">
+    <div className="page project-detail-page">
+      <div className="flex mt-7 justify-center items-start min-h-[100vh] sm:gap-4 sm:py-4">
         <div className="w-[100%] px-5 md:w-[1000px] pb-5">
-          <div className="space-y-12">
-            <div className="border-b border-gray-900/10 pb-12">
-              <div className="flex justify-end">
-                <Button onClick={handleReturnToPortfolio}>
-                  Return to Portfolio
-                </Button>
+          <div className="space-y-8">
+            {/* Header with back button */}
+            <div className="flex justify-between items-center mb-6">
+              <button
+                onClick={handleReturnToPortfolio}
+                className="project-back-btn"
+              >
+                ← Back to Portfolio
+              </button>
+            </div>
+
+            {/* Project Title */}
+            <h1 className="project-detail-title">{project.title}</h1>
+
+            {/* Video Section */}
+            {project.video?.url ? (
+              <div className="project-detail-video-wrapper">
+                <video
+                  src={project.video.url}
+                  controls
+                  autoPlay
+                  className="project-detail-video"
+                  onError={(e) => {
+                    console.error('Video load error:', e);
+                    toast.error('Failed to load video');
+                  }}
+                />
               </div>
-              <div className="mt-10 flex flex-col gap-5">
-                <div className="w-full sm:col-span-4">
-                  <h1 className="text-2xl font-bold mb-4">{title}</h1>
-                  <img
-                    src={
-                      projectBannerPreview
-                        ? projectBannerPreview
-                        : '/avatarHolder.jpg'
-                    }
-                    alt="projectBanner"
-                    className="w-full h-auto rounded-lg"
-                  />
+            ) : (
+              <div className="project-detail-video-wrapper project-video-placeholder">
+                <div className="project-video-placeholder-content">
+                  <span>📹</span>
+                  <p>No video available for this project</p>
                 </div>
-                <div className="w-full sm:col-span-4">
-                  <p className="text-2xl mb-2">Description:</p>
-                  <ul className="list-disc pl-6 space-y-1">
-                    {descriptionList.map((item, index) => (
-                      <li key={index}>{item}</li>
-                    ))}
-                  </ul>
+              </div>
+            )}
+
+            {/* Description */}
+            <div className="project-detail-section">
+              <h2 className="project-detail-section-title">About This Project</h2>
+              <div className="project-detail-description">
+                <FormattedDescription text={project.description} />
+              </div>
+            </div>
+
+            {/* Tech Stack */}
+            {project.techStack?.length > 0 && (
+              <div className="project-detail-section">
+                <h2 className="project-detail-section-title">Technologies Used</h2>
+                <div className="project-detail-tech-stack">
+                  {project.techStack.map((tech, index) => (
+                    <span key={index} className="tech-badge">{tech}</span>
+                  ))}
                 </div>
-                <div className="w-full sm:col-span-4">
-                  <p className="text-2xl mb-2">Technologies:</p>
-                  <ul className="list-disc pl-6 space-y-1">
-                    {technologiesList.map((item, index) => (
-                      <li key={index}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="w-full sm:col-span-4">
-                  <p className="text-2xl mb-2">Stack:</p>
-                  <p>{stack}</p>
-                </div>
-                <div className="w-full sm:col-span-4">
-                  <p className="text-2xl mb-2">Deployed:</p>
-                  <p>{deployed}</p>
-                </div>
-                <div className="w-full sm:col-span-4">
-                  <p className="text-2xl mb-2">Github Repository Link:</p>
-                  <Link className="text-sky-400" target="_blank" to={gitRepoLink}>
-                    {gitRepoLink}
-                  </Link>
-                </div>
-                <div className="w-full sm:col-span-4">
-                  <p className="text-2xl mb-2">Project Link:</p>
-                  <Link className="text-sky-400" target="_blank" to={projectLink}>
-                    {projectLink}
-                  </Link>
-                </div>
+              </div>
+            )}
+
+            {/* Links */}
+            <div className="project-detail-section">
+              <h2 className="project-detail-section-title">Project Links</h2>
+              <div className="project-detail-links">
+                {project.liveUrl && (
+                  <a
+                    href={project.liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="project-detail-link-btn live-demo"
+                  >
+                    🌐 Live Demo
+                  </a>
+                )}
+                {project.githubUrl && (
+                  <a
+                    href={project.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="project-detail-link-btn github"
+                  >
+                    💻 GitHub Repository
+                  </a>
+                )}
               </div>
             </div>
           </div>

@@ -4,5 +4,6 @@ dist/
 .env.local
 .env.*.local
 backend/.env
+dashboard/.env
 *.log
 .DS_Store

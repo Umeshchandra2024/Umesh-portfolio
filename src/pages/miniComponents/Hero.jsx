@@ -1,16 +1,34 @@
 import { useEffect, useState } from 'react';
-import { Github, Linkedin, Instagram, Twitter } from 'lucide-react';
+import { Github, Linkedin, Instagram, Twitter, FileText } from 'lucide-react';
+import { fetchResume, getResumeViewUrl } from '@/lib/resumeApi';
 
-const TYPED_WORDS = ['Web Developer', 'MERN Stack Enthusiast', 'Problem Solver'];
+const TYPED_WORDS = ['Full Stack Developer', 'Tech Enthusiast', 'Problem Solver'];
 
 export default function Hero() {
   const [wordIndex, setWordIndex] = useState(0);
   const [displayText, setDisplayText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [nameVisible, setNameVisible] = useState(false);
+  const [resumeUrl, setResumeUrl] = useState(null);
 
   useEffect(() => {
     setNameVisible(true);
+  }, []);
+
+  useEffect(() => {
+    fetchResume()
+      .then((data) => {
+        console.log('Resume data fetched:', data);
+        if (data?.resume?.url) {
+          console.log('Resume URL set:', data.resume.url);
+          setResumeUrl(data.resume.url);
+        } else {
+          console.log('No resume URL found');
+        }
+      })
+      .catch((err) => {
+        console.error('Error fetching resume:', err);
+      });
   }, []);
 
   useEffect(() => {
@@ -61,7 +79,7 @@ export default function Hero() {
 
         <div className="hero-social-row-clean">
           <a
-            href="https://github.com"
+            href="https://github.com/Umeshchandra2024"
             target="_blank"
             rel="noopener noreferrer"
             className="social-btn"
@@ -70,7 +88,7 @@ export default function Hero() {
             <Github size={20} />
           </a>
           <a
-            href="https://linkedin.com"
+            href="https://www.linkedin.com/in/umesh-chandra-21173b270/"
             target="_blank"
             rel="noopener noreferrer"
             className="social-btn"
@@ -78,7 +96,7 @@ export default function Hero() {
           >
             <Linkedin size={20} />
           </a>
-          <a
+          {/* <a
             href="https://instagram.com"
             target="_blank"
             rel="noopener noreferrer"
@@ -86,9 +104,9 @@ export default function Hero() {
             aria-label="Instagram"
           >
             <Instagram size={20} />
-          </a>
+          </a> */}
           <a
-            href="https://twitter.com"
+            href="https://x.com/Umesh1145"
             target="_blank"
             rel="noopener noreferrer"
             className="social-btn"
@@ -103,9 +121,17 @@ export default function Hero() {
             <Github size={18} />
             <span>View Projects</span>
           </a>
-          <a href="#contact" className="btn btn-ghost">
-            <span>Get Resume</span>
-          </a>
+          {resumeUrl ? (
+            <a href={getResumeViewUrl(resumeUrl)} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
+              <FileText size={18} />
+              <span>Get Resume</span>
+            </a>
+          ) : (
+            <a href="#contact" className="btn btn-ghost">
+              <FileText size={18} />
+              <span>Get Resume</span>
+            </a>
+          )}
         </div>
       </div>
     </section>

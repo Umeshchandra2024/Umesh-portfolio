@@ -5,6 +5,7 @@ import MyApps from './miniComponents/MyApps';
 import About from './miniComponents/About';
 import Portfolio from './miniComponents/Portfolio';
 import Contact from './miniComponents/Contact';
+import Thanks from './miniComponents/Thanks';
 import Footer from './miniComponents/Footer';
 
 export default function Home() {
@@ -19,6 +20,7 @@ export default function Home() {
           <Portfolio />
           <MyApps />
           <Contact />
+          <Thanks />
         </article>
       </main>
       <Footer />

@@ -10,9 +10,12 @@ export const getSkills = catchAsyncError(async (_req, res) => {
 
 export const addSkill = catchAsyncError(async (req, res) => {
   const { name, level, category, order } = req.body;
+  if (!name || typeof name !== 'string' || !name.trim()) {
+    throw new ErrorHandler('Skill name is required', 400);
+  }
 
   let logo;
-  if (req.files?.logo) {
+  if (req.files?.logo?.tempFilePath) {
     const result = await cloudinary.v2.uploader.upload(req.files.logo.tempFilePath, {
       folder: 'portfolio/skills',
     });
@@ -23,10 +26,10 @@ export const addSkill = catchAsyncError(async (req, res) => {
   }
 
   const skill = await Skill.create({
-    name,
-    level,
-    category,
-    order,
+    name: name.trim(),
+    level: level || 'advanced',
+    category: category || 'general',
+    order: order !== undefined && order !== '' ? Number(order) : 0,
     logo,
   });
 
@@ -40,7 +43,7 @@ export const updateSkill = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler('Skill not found', 404));
   }
 
-  if (req.files?.logo) {
+  if (req.files?.logo?.tempFilePath) {
     if (skill.logo?.public_id) {
       await cloudinary.v2.uploader.destroy(skill.logo.public_id);
     }
@@ -53,7 +56,15 @@ export const updateSkill = catchAsyncError(async (req, res, next) => {
     };
   }
 
-  skill = await Skill.findByIdAndUpdate(req.params.id, req.body, {
+  const updateFields = { ...req.body };
+  if (updateFields.order !== undefined && updateFields.order !== '') {
+    updateFields.order = Number(updateFields.order);
+  }
+  if (updateFields.name && typeof updateFields.name === 'string') {
+    updateFields.name = updateFields.name.trim();
+  }
+
+  skill = await Skill.findByIdAndUpdate(req.params.id, updateFields, {
     new: true,
     runValidators: true,
   });

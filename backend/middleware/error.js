@@ -30,6 +30,12 @@ export const errorMiddleware = (err, _req, res, _next) => {
       .join(', ');
   }
 
+  // JWT expired or invalid
+  if (err.name === 'TokenExpiredError' || err.name === 'JsonWebTokenError') {
+    statusCode = 401;
+    message = 'Session expired. Please log in again.';
+  }
+
   res.status(statusCode).json({
     success: false,
     message: message || 'Internal Server Error',
