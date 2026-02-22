@@ -54,7 +54,7 @@ Example: `VITE_API_URL=https://your-api.onrender.com`
 6. **Environment Variables:** add `VITE_API_URL` = same backend URL.
 7. Deploy. Dashboard will be at a different URL, e.g. `https://your-dashboard.vercel.app`.
 
-`vercel.json` in root and in `dashboard/` are already set for SPA routing.
+(Vercel usually handles SPA routing for Vite. If direct URLs like `/manage/project` show 404, add a rewrite in Project Settings → the route `/*` → `/index.html`.)
 
 ---
 
